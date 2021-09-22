@@ -1,45 +1,30 @@
 (ns cljukebox.core
-  (:require [clojure.edn :as edn]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [clojure.core.async :refer [chan close!]]
             [discljord.messaging :as discord-rest]
             [discljord.connections :as discord-ws]
             [discljord.formatting :refer [mention-user]]
             [discljord.events :refer [message-pump!]]
-            [clojure.java.io :as io]))
-
-
-(defn read-config []
-  (let [config-file (io/file "config.edn")]
-    (if (.exists config-file)
-      (edn/read-string (slurp config-file))
-      {:token nil
-       :default-prefix "^"})))
+            [cljukebox.util :as util]
+            [cljukebox.handlers.prefix :as prefix]))
 
 (def !state (atom nil))
 (def !bot-id (atom nil))
-(def !config (atom (read-config)))
-
-(defn merge-to-config [m]
-  (let [current-config @!config
-        updated-config (merge current-config m)]
-    (reset! !config updated-config)
-    (spit "config.edn" updated-config)))
-
-(defmulti handle-event (fn [type _data] type))
+(def !config (atom (util/read-config)))
 
 (def handlers
-  {"test" (fn [{:keys [channel-id] :as data}] (discord-rest/create-message! (:rest @!state) channel-id :content "Testing!"))})
+  {"prefix" prefix/set-prefix})
+
+(defmulti handle-event (fn [type _data] type))
 
 (defn get-handler-fn [content prefix]
   (some (fn [[k v]] (when (string/starts-with? content (str prefix k)) v)) handlers))
 
 (defmethod handle-event :message-create
-  [_ {:keys [channel-id content] :as data}]
-  (let [{:keys [default-prefix] :as config-map} @!config
-        prefix (or (get-in config-map [channel-id :prefix]) default-prefix)
+  [_ {:keys [guild-id content] :as data}]
+  (let [prefix (util/get-prefix @!config guild-id)
         handler-fn (get-handler-fn content prefix)]
-    (when handler-fn (handler-fn data))))
+    (when handler-fn (handler-fn !config !state data))))
 
 (defmethod handle-event :ready
   [_ _]
@@ -62,7 +47,7 @@
 
 (defn -main [& [api-token]]
   (when api-token
-    (merge-to-config {:token api-token}))
+    (util/merge-to-config !config {:token api-token}))
   (if-let [token (:token @!config)]
     (do
       (reset! !state (start-bot! token :guild-messages))
