@@ -6,24 +6,18 @@
             [discljord.formatting :refer [mention-user]]
             [discljord.events :refer [message-pump!]]
             [cljukebox.util :as util]
-            [cljukebox.handlers.prefix :as prefix]))
+            [cljukebox.handlers :as handlers]))
 
 (def !state (atom nil))
 (def !bot-id (atom nil))
 (def !config (atom (util/read-config)))
 
-(def handlers
-  {"prefix" prefix/set-prefix})
-
 (defmulti handle-event (fn [type _data] type))
-
-(defn get-handler-fn [content prefix]
-  (some (fn [[k v]] (when (string/starts-with? content (str prefix k)) v)) handlers))
 
 (defmethod handle-event :message-create
   [_ {:keys [guild-id content] :as data}]
   (let [prefix (util/get-prefix @!config guild-id)
-        handler-fn (get-handler-fn content prefix)]
+        handler-fn (handlers/get-handler-fn content prefix)]
     (when handler-fn (handler-fn !config !state data))))
 
 (defmethod handle-event :ready
