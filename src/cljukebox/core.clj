@@ -8,11 +8,6 @@
             [discljord.events :refer [message-pump!]]
             [clojure.java.io :as io]))
 
-(def !state (atom nil))
-
-(def !bot-id (atom nil))
-
-(def default-config )
 
 (defn read-config []
   (let [config-file (io/file "config.edn")]
@@ -21,6 +16,8 @@
       {:token nil
        :default-prefix "^"})))
 
+(def !state (atom nil))
+(def !bot-id (atom nil))
 (def !config (atom (read-config)))
 
 (defn merge-to-config [m]
@@ -31,13 +28,18 @@
 
 (defmulti handle-event (fn [type _data] type))
 
+(def handlers
+  {"test" (fn [{:keys [channel-id] :as data}] (discord-rest/create-message! (:rest @!state) channel-id :content "Testing!"))})
+
+(defn get-handler-fn [content prefix]
+  (some (fn [[k v]] (when (string/starts-with? content (str prefix k)) v)) handlers))
+
 (defmethod handle-event :message-create
   [_ {:keys [channel-id content] :as data}]
   (let [{:keys [default-prefix] :as config-map} @!config
         prefix (or (get-in config-map [channel-id :prefix]) default-prefix)
-        has-command-str? (fn [command-str] (string/includes? content (str prefix command-str)))]
-    (cond
-      (has-command-str? "test") (discord-rest/create-message! (:rest @!state) channel-id :content "Testing!"))))
+        handler-fn (get-handler-fn content prefix)]
+    (when handler-fn (handler-fn data))))
 
 (defmethod handle-event :ready
   [_ _]
