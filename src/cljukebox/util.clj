@@ -17,8 +17,14 @@
     (reset! !config updated-config)
     (spit "config.edn" updated-config)))
 
-(defn get-prefix [{:keys [default-prefix] :as config-map} guild-id]
-  (or (get-in config-map [guild-id :prefix]) default-prefix))
+(defn get-prefix [!config guild-id]
+  (let [{:keys [default-prefix] :as config-map} @!config]
+    (or (get-in config-map [guild-id :prefix]) default-prefix)))
 
-(defn send-message [!state channel-id content]
-  (discord-rest/create-message! (:rest @!state) channel-id :content content))
+(defn send-message
+  ([!state channel-id content]
+   (discord-rest/create-message! (:rest @!state) channel-id :content content)))
+
+(defn send-embed
+  ([!state channel-id embed]
+   (discord-rest/create-message! (:rest @!state) channel-id :embed embed)))

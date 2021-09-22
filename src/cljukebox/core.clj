@@ -16,7 +16,7 @@
 
 (defmethod handle-event :message-create
   [_ {:keys [guild-id content] :as data}]
-  (let [prefix (util/get-prefix @!config guild-id)
+  (let [prefix (util/get-prefix !config guild-id)
         handler-fn (handlers/get-handler-fn content prefix)]
     (when handler-fn (handler-fn !config !state data))))
 

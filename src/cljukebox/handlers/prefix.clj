@@ -8,9 +8,9 @@
       (let [[_ new-prefix] split-data]
         (util/merge-to-config !config {guild-id {:prefix new-prefix}})
         (util/send-message !state channel-id (format "Command prefix set to `%s`" new-prefix)))
-      (util/send-message !state channel-id (format "Command prefix is currently set to `%s`" (util/get-prefix @!config guild-id))))))
+      (util/send-message !state channel-id (format "Command prefix is currently set to `%s`" (util/get-prefix !config guild-id))))))
 
-(def prefix-data
+(def handler-data
   {:doc "Sets the server wide command prefix (default is `^`)"
    :usage-str "prefix <new-prefix>"
    :handler-fn set-prefix })
