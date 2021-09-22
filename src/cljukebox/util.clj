@@ -1,8 +1,26 @@
 (ns cljukebox.util
   (:require [clojure.edn :as edn]
-            [discljord.messaging :as discord-rest]
             [clojure.java.io :as io]
-            [medley.core :as medley]))
+            [medley.core :as medley])
+  (:import [java.util.function Consumer Function]
+           discord4j.core.object.entity.channel.MessageChannel
+           discord4j.core.event.domain.message.MessageCreateEvent
+           discord4j.core.spec.EmbedCreateSpec))
+
+(defn ^Function as-function [f]
+  (reify java.util.function.Function
+    (apply [this arg] (f arg))))
+
+(defn ^Consumer as-consumer [f]
+  (reify java.util.function.Consumer
+    (accept [this arg]
+      (f arg))))
+
+(defn message-event->map [^MessageCreateEvent message-event]
+  (let [message (.getMessage message-event)]
+    {:guild-id (-> message-event .getGuildId .get .asString)
+     :message-channel (.getChannel message )
+     :content (.getContent message)}))
 
 (defn read-config []
   (let [config-file (io/file "config.edn")]
@@ -22,9 +40,19 @@
     (or (get-in config-map [guild-id :prefix]) default-prefix)))
 
 (defn send-message
-  ([!state channel-id content]
-   (discord-rest/create-message! (:rest @!state) channel-id :content content)))
+  ([message-channel content]
+   (.flatMap message-channel (as-function (fn [channel] (.createMessage channel content))))))
 
 (defn send-embed
-  ([!state channel-id embed]
-   (discord-rest/create-message! (:rest @!state) channel-id :embed embed)))
+  ([message-channel {:keys [title description fields]}]
+   (.flatMap message-channel
+             (as-function (fn [channel]
+                            (.createEmbed channel
+                                          (as-consumer (fn [embed-spec]
+                                                         (reduce
+                                                          (fn [embed {:keys [name value inline] :as field}]
+                                                            (.addField embed name value (some? inline)))
+                                                          (-> embed-spec
+                                                              (.setTitle title)
+                                                              (.setDescription description))
+                                                          fields)))))))))
