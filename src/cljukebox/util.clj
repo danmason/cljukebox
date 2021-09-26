@@ -14,8 +14,9 @@
       {:token nil
        :default-prefix "^"})))
 
-;; Bot state
+;; Bot config
 (def !config (atom (read-config)))
+
 (defn ^Function as-function [f]
   (reify java.util.function.Function
     (apply [this arg] (f arg))))
@@ -29,10 +30,13 @@
   (:token @!config))
 
 (defn message-event->map [^MessageCreateEvent message-event]
-  (let [message (.getMessage message-event)]
-    {:guild-id (-> message-event .getGuildId .get .asString)
-     :message-channel (.getChannel message )
-     :content (.getContent message)}))
+  (let [message (.getMessage message-event)
+        member (some-> message-event .getMember (.orElse nil))]
+    {:guild-id (some-> message-event .getGuildId (.orElse nil) .asString)
+     :message-channel (.getChannel message)
+     :content (.getContent message)
+     :member member
+     :voice-channel (some-> member .getVoiceState .block .getChannel .block)}))
 
 (defn merge-to-config [m]
   (let [current-config @!config
@@ -44,12 +48,12 @@
   (let [{:keys [default-prefix] :as config-map} @!config]
     (or (get-in config-map [guild-id :prefix]) default-prefix)))
 
-(defn send-message
-  ([message-channel content]
+(defn send-message [message-channel content]
+  (.block
    (.flatMap message-channel (as-function (fn [channel] (.createMessage channel content))))))
 
-(defn send-embed
-  ([message-channel {:keys [title description fields]}]
+(defn send-embed [message-channel {:keys [title description fields]}]
+  (.block
    (.flatMap message-channel
              (as-function (fn [channel]
                             (.createEmbed channel
@@ -61,3 +65,8 @@
                                                               (.setTitle title)
                                                               (.setDescription description))
                                                           fields)))))))))
+
+(defn millis->time-str [millis]
+  (let [minutes (int (/ (/ millis 1000) 60))
+        seconds (int (mod (/ millis 1000) 60))]
+    (format "%d:%d" minutes seconds)))

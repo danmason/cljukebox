@@ -1,10 +1,19 @@
 (ns cljukebox.handlers
   (:require [clojure.string :as string]
-            [cljukebox.handlers.prefix :as prefix]
-            [cljukebox.util :as util]))
+            [cljukebox.util :as util]
+            [cljukebox.handlers
+             [prefix :as prefix]
+             [play :as play]
+             [queue :as queue]
+             [leave :as leave]
+             [skip :as skip]]))
 
 (def base-handlers
-  {"prefix" prefix/handler-data})
+  {"prefix" prefix/handler-data
+   "play" play/handler-data
+   "queue" queue/handler-data
+   "leave" leave/handler-data
+   "skip" skip/handler-data})
 
 (defn help-handler [{:keys [message-channel guild-id content] :as data}]
   (let [prefix (util/get-prefix guild-id)
@@ -17,10 +26,10 @@
                                                     :value (format "`%s`" usage-str)}]})
         (util/send-message message-channel (format "*%s* is not an existing command" command)))
       (util/send-embed message-channel {:title "Help Menu"
-                                        :description "For usage examples of specific commands, use `help <command>`"
-                                        :fields (mapv (fn [[k v]]
+                                        :description "For more information about specific commands, use `help <command>`"
+                                        :fields (mapv (fn [[k {:keys [doc]}]]
                                                         {:name k
-                                                         :value (:doc v)})
+                                                         :value doc})
                                                       base-handlers)}))))
 
 (def handlers

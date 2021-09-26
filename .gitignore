@@ -1,3 +1,4 @@
 config.edn
 target/
 .nrepl-port
+/logs/
