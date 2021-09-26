@@ -6,8 +6,10 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [com.discord4j/discord4j-core "3.1.7"]
                  [com.sedmelluq/lavaplayer "1.3.77" ]
+                 [ch.qos.logback/logback-classic "1.2.3"]
                  [medley "1.3.0"]]
   :repl-options {:init-ns cljukebox.core}
   :repositories [["m2-dv8tion" "https://m2.dv8tion.net/releases"]]
   :java-source-paths ["java-src"]
+  :jvm-opts ["-Dlogback.configurationFile=resources/logback.xml"]
   :main cljukebox.core)
