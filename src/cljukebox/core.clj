@@ -8,14 +8,12 @@
            discord4j.core.event.domain.message.MessageCreateEvent
            reactor.core.publisher.Mono))
 
-(def !config (atom (util/read-config)))
-
 (defn on-message [message-event]
   (let [{:keys [guild-id message-channel content] :as data} (util/message-event->map message-event)
-        prefix (util/get-prefix !config guild-id)
+        prefix (util/get-prefix guild-id)
         handler-fn (handlers/get-handler-fn content prefix)]
     (if handler-fn
-      (handler-fn !config data)
+      (handler-fn data)
       (Mono/empty))))
 
 (defn on-bot-ready [^ReadyEvent ready-event]
@@ -42,7 +40,7 @@
 
 (defn -main [& [api-token]]
   (when api-token
-    (util/merge-to-config !config {:token api-token}))
-  (if-let [token (:token @!config)]
+    (util/merge-to-config {:token api-token}))
+  (if-let [token (util/get-api-token)]
     (start-bot! token)
     (println "API token not configured - pass as an argument when starting the bot.")))
