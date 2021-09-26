@@ -12,9 +12,9 @@
   (let [{:keys [guild-id message-channel content] :as data} (util/message-event->map message-event)
         prefix (util/get-prefix guild-id)
         handler-fn (handlers/get-handler-fn content prefix)]
-    (if handler-fn
-      (handler-fn data)
-      (Mono/empty))))
+    (when handler-fn
+      (handler-fn data))
+    (Mono/empty)))
 
 (defn on-bot-ready [^ReadyEvent ready-event]
   (-> ready-event
