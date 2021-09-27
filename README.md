@@ -1,12 +1,13 @@
 # cljukebox
-A clojure based self-hosted music bot for Discord - built using [**Discord4J**](https://github.com/Discord4J/Discord4J) and [**lavaplayer**](https://github.com/sedmelluq/lavaplayer).
+A clojure based self-hosted music bot for Discord - built using [**Discord4J**](https://github.com/Discord4J/Discord4J) and [**lavaplayer**](https://github.com/sedmelluq/lavaplayer). 
 
 ## Running the Bot
 
 To run the bot, you will require an API token for a bot user - see the [discord.py docs](https://discordpy.readthedocs.io/en/stable/discord.html) if you need help creating a bot user. Version artifacts are available on both [**Dockerhub**](https://hub.docker.com/repository/docker/danmason/cljukebox) and the [**Github releases**](https://github.com/danmason/cljukebox/releases) tab.
 
 
-### Using the JAR
+### Using the JAR (Java 11+)
+
 With Java installed, running the bot should be fairly simple. With `cljukebox.jar` downloaded to a folder, you can run the following:
 ```bash
 java -jar cljukebox.jar <api-token>
