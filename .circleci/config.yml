@@ -28,20 +28,23 @@ jobs:
       - run: lein uberjar
       - run:
           command: |
-            mkdir artifacts
-            mv target/cljukebox.jar artifacts/cljukebox.jar
+            mkdir ~/artifacts
+            mv target/cljukebox.jar ~/artifacts/cljukebox.jar
+      - persist_to_workspace:
+          root: ~/
+          paths: artifacts
+
+
   publish-github-release:
     docker:
-      - image: circleci/golang:1.8
+      - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ./artifacts
+          at: ~/
       - run:
           name: "Publish Release on GitHub"
           command: |
-            go get github.com/tcnksm/ghr
-            VERSION=$(my-binary --version)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/artifacts/
 
 
 workflows:
@@ -55,8 +58,10 @@ workflows:
            branches:
              only: main
       - publish-github-release:
+          requires:
+            - build-uberjar
           filters:
            tags:
-             only: /.*/
+             only: /^\d+\.\d+\.\d+$/
            branches:
-             ignore: /^\d+\.\d+\.\d+$/
+             ignore: /.*/
