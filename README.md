@@ -1,12 +1,40 @@
 # cljukebox
-A clojure based self-hosted music bot for Discord.
+A clojure based self-hosted music bot for Discord - built using [**Discord4J**](https://github.com/Discord4J/Discord4J) and [**lavaplayer**](https://github.com/sedmelluq/lavaplayer).
 
 ## Running the Bot
-(Instructions for running released JAR)
-(Instructions for running Docker container)
+
+To run the bot, you will require an API token for a bot user - see the [discord.py docs](https://discordpy.readthedocs.io/en/stable/discord.html) if you need help creating a bot user. Version artifacts are available on both [**Dockerhub**](https://hub.docker.com/repository/docker/danmason/cljukebox) and the [**Github releases**](https://github.com/danmason/cljukebox/releases) tab.
+
+
+### Using the JAR
+With Java installed, running the bot should be fairly simple. With `cljukebox.jar` downloaded to a folder, you can run the following:
+```bash
+java -jar cljukebox.jar <api-token>
+```
+
+This will set up the bot with your API token (- so in future runs bot can be ran with:
+```bash
+java -jar cljukebox.jar
+```
+
+### Using Docker
+To persist bot configuration between runs, you will need to make a [**docker volume**](https://docs.docker.com/storage/volumes/). To create a volume, run the following: 
+```bash
+docker volume create <volume-name>
+```
+
+Once you have the above set up and you have pulled the latest version of the bot, you can run the following command:
+```bash
+docker run -v <volume-name>:/usr/lib/cljukebox danmason/cljukebox:0.1.0 <api-token>
+```
+
+This will set up the bot with your API token - so in future runs bot can be ran with:
+```bash
+docker run -v <volume-name>:/usr/lib/cljukebox danmason/cljukebox:0.1.0
+```
 
 ## Releasing
-Push a tag to the repository with the new version number - CircleCI will build the Uberjar and upload it to the Job's 'Artifact' page, and then will push the docker image to Dockerhub.
+Push a tag to the repository with the new version number - CircleCI will build the Uberjar and upload it to the tag's release, and will push the docker image to Dockerhub.
 
 ## License
 
