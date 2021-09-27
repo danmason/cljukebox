@@ -51,12 +51,10 @@ workflows:
       - build-uberjar:
           filters:
            tags:
-             only: /.*/
-           branches:
-             ignore: /.*/
+             only: /^\d+\.\d+\.\d+$/
       - publish-github-release:
           filters:
            tags:
              only: /.*/
            branches:
-             ignore: /.*/
+             ignore: /^\d+\.\d+\.\d+$/
