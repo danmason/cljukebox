@@ -6,7 +6,8 @@
            [discord4j.core.object.presence Presence Status Activity]
            discord4j.core.event.domain.lifecycle.ReadyEvent
            discord4j.core.event.domain.message.MessageCreateEvent
-           reactor.core.publisher.Mono))
+           reactor.core.publisher.Mono)
+  (:gen-class))
 
 (defn on-message [message-event]
   (let [{:keys [guild-id message-channel content] :as data} (util/message-event->map message-event)
