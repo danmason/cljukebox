@@ -12,4 +12,5 @@
   :repositories [["m2-dv8tion" "https://m2.dv8tion.net/releases"]]
   :java-source-paths ["java-src"]
   :jvm-opts ["-Dlogback.configurationFile=resources/logback.xml"]
+  :uberjar-name "cljukebox.jar"
   :main cljukebox.core)
