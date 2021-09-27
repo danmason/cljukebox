@@ -13,6 +13,7 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
 
   public final List<AudioTrack> queue;
   private final AudioPlayer player;
+  public boolean loop = false;
 
   public AudioTrackScheduler(final AudioPlayer player) {
     queue = Collections.synchronizedList(new LinkedList<>());
@@ -46,10 +47,16 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     }
   }
 
+  public boolean setLoop(boolean shouldLoop) {
+    this.loop = shouldLoop;
+    return loop;
+  }
+
   @Override
   public void onTrackEnd(final AudioPlayer player, final AudioTrack track, final AudioTrackEndReason endReason) {
-    // Advance the player if the track completed naturally (FINISHED) or if the track cannot play (LOAD_FAILED)
-    if (endReason.mayStartNext) {
+    if(loop && endReason == AudioTrackEndReason.FINISHED) {
+	play(track.makeClone(), true);
+    } else {
       skip();
     }
   }
