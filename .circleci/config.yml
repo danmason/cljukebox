@@ -4,6 +4,9 @@
 #
 version: 2.1
 
+orbs:
+  docker: circleci/docker@0.5.20
+
 jobs:
   build-uberjar:
     docker:
@@ -28,23 +31,40 @@ jobs:
       - run: lein uberjar
       - run:
           command: |
-            mkdir ~/artifacts
-            mv target/cljukebox.jar ~/artifacts/cljukebox.jar
+            mkdir artifacts
+            cp target/cljukebox.jar artifacts/cljukebox.jar
       - persist_to_workspace:
-          root: ~/
-          paths: artifacts
-
+          root: ./
+          paths:
+            - target
+            - artifacts
 
   publish-github-release:
     docker:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ~/
+          at: ./
       - run:
           name: "Publish Release on GitHub"
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+
+  deploy-docker-image:
+    docker:
+      - image: circleci/clojure:lein-2.9.5
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - docker/install-docker
+      - setup_remote_docker
+      - run:
+          command: |
+            export IMAGE_NAME=danmason/cljukebox
+            docker build -t "${IMAGE_NAME}:${CIRCLE_TAG}" .
+            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+            docker push "${IMAGE_NAME}:${CIRCLE_TAG}"
 
 
 workflows:
@@ -58,6 +78,14 @@ workflows:
            branches:
              only: main
       - publish-github-release:
+          requires:
+            - build-uberjar
+          filters:
+           tags:
+             only: /^\d+\.\d+\.\d+$/
+           branches:
+             ignore: /.*/
+      - deploy-docker-image:
           requires:
             - build-uberjar
           filters:
