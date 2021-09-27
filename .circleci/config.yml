@@ -10,7 +10,7 @@ orbs:
 jobs:
   build-uberjar:
     docker:
-      - image: circleci/clojure:lein-2.9.5
+      - image: circleci/clojure:openjdk-11-lein-2.9.5
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
@@ -52,7 +52,7 @@ jobs:
 
   deploy-docker-image:
     docker:
-      - image: circleci/clojure:lein-2.9.5
+      - image: circleci/clojure:openjdk-11-lein-2.9.5
     steps:
       - checkout
       - attach_workspace:
