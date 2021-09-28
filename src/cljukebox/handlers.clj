@@ -7,7 +7,8 @@
              [queue :as queue]
              [leave :as leave]
              [skip :as skip]
-             [loop :as loop]]))
+             [loop :as loop]
+             [clear :as clear]]))
 
 (def base-handlers
   {"prefix" prefix/handler-data
@@ -15,7 +16,8 @@
    "queue" queue/handler-data
    "leave" leave/handler-data
    "skip" skip/handler-data
-   "loop" loop/handler-data})
+   "loop" loop/handler-data
+   "clear" clear/handler-data})
 
 (defn help-handler [{:keys [message-channel guild-id content] :as data}]
   (let [prefix (util/get-prefix guild-id)

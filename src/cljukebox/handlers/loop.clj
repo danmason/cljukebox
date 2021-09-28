@@ -1,6 +1,5 @@
 (ns cljukebox.handlers.loop
- (:require [clojure.string :as string]
-            [cljukebox.player :as player]
+  (:require [cljukebox.player :as player]
             [cljukebox.util :as util]))
 
 (def !loop (atom false))
