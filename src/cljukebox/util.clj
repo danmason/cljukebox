@@ -1,5 +1,6 @@
 (ns cljukebox.util
   (:require [clojure.edn :as edn]
+            [clojure.string :as string]
             [clojure.java.io :as io]
             [medley.core :as medley])
   (:import [java.util.function Consumer Function]
@@ -70,3 +71,8 @@
   (let [minutes (int (/ (/ millis 1000) 60))
         seconds (int (mod (/ millis 1000) 60))]
     (format "%d:%d" minutes seconds)))
+
+(defn get-arguments [content-with-command]
+  (let [args (rest (string/split content-with-command #" "))]
+    (cond-> args
+      (< (count args) 2) first)))

@@ -7,12 +7,15 @@
     {:name (format "%d: %s" idx title)
      :value (format "**Author**: %s | **Length**: %s" author length)}))
 
-(defn audio-queue [{:keys [message-channel guild-id] :as data}]
-  (let [{:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)
-        track-queue (.queue scheduler)]
-    (util/send-embed message-channel {:title "Bot Queue"
-                                      :description "Currently queued songs on the bot:"
-                                      :fields (map-indexed create-track-field track-queue)})))
+(defn audio-queue
+  ([data]
+   (audio-queue data nil))
+  ([{:keys [message-channel guild-id] :as data} _opts]
+   (let [{:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)
+         track-queue (.queue scheduler)]
+     (util/send-embed message-channel {:title "Bot Queue"
+                                       :description "Currently queued songs on the bot:"
+                                       :fields (map-indexed create-track-field track-queue)}))))
 
 (def handler-data
   {:doc "Outputs the current player queue for the server"
