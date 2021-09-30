@@ -18,6 +18,10 @@
                          (player/mk-audio-handler scheduler message-channel))))))
 
 (def handler-data
-  {:doc "Will add audio to the bot's playlist - if not currently playing anything, will join the bot to the calling user's voice channel. For a list of supported sources/file formats, see here: https://github.com/sedmelluq/lavaplayer#supported-formats"
+  {:doc "Add a track to the bot's playlist"
+   :long-doc "Add a track to the bot's playlist - if not currently playing anything, will join the bot to the calling user's voice channel. For a list of supported sources/file formats, see here: https://github.com/sedmelluq/lavaplayer#supported-formats"
    :usage-str "play <media-url>"
+   :args [{:name "url"
+           :doc "URL of the track you want to play"
+           :required? true}]
    :handler-fn play-audio})
