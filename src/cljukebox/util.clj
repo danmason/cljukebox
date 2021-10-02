@@ -1,10 +1,13 @@
 (ns cljukebox.util
   (:require [clojure.edn :as edn]
+            [clojure.string :as string]
             [clojure.java.io :as io]
             [medley.core :as medley])
   (:import [java.util.function Consumer Function]
            discord4j.core.object.entity.channel.MessageChannel
            discord4j.core.event.domain.message.MessageCreateEvent
+           discord4j.core.object.command.ApplicationCommandInteractionOption
+           discord4j.core.event.domain.interaction.ChatInputInteractionEvent
            discord4j.core.spec.EmbedCreateSpec))
 
 (defn read-config []
@@ -38,6 +41,24 @@
      :member member
      :voice-channel (some-> member .getVoiceState .block .getChannel .block)}))
 
+(defn chat-input-event->map [^ChatInputInteractionEvent chat-input-event]
+  (let [interaction (.getInteraction chat-input-event)
+        member (some-> interaction .getMember (.orElse nil))]
+    {:guild-id (some-> interaction .getGuildId (.orElse nil) .asString)
+     :message-channel (.getChannel interaction)
+     :member member
+     :voice-channel (some-> member .getVoiceState .block .getChannel .block)
+     :command (.getCommandName chat-input-event)
+     :args (some->> (.getOptions chat-input-event)
+                    (not-empty)
+                    (map (fn [^ApplicationCommandInteractionOption option]
+                           (let [k (keyword (.getName option))
+                                 v (some-> (.getValue option)
+                                           (.orElse nil)
+                                           (.asString))]
+                             [k v])))
+                    (into {}))}))
+
 (defn merge-to-config [m]
   (let [current-config @!config
         updated-config (medley/deep-merge current-config m)]
@@ -70,3 +91,8 @@
   (let [minutes (int (/ (/ millis 1000) 60))
         seconds (int (mod (/ millis 1000) 60))]
     (format "%d:%d" minutes seconds)))
+
+(defn get-arguments [content-with-command]
+  (let [args (rest (string/split content-with-command #" "))]
+    (cond-> args
+      (< (count args) 2) first)))
