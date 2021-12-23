@@ -30,8 +30,9 @@
 (defn on-chat-input [chat-input-event]
   (let [{:keys [command args] :as data} (util/chat-input-event->map chat-input-event)
         handler-fn (get-in handlers/handlers [command :handler-fn])]
-    (.subscribe (.reply chat-input-event "Command received"))
+    (.subscribe (.deferReply chat-input-event))
     (handler-fn data args)
+    (.subscribe (.deleteReply chat-input-event))
     (Mono/empty)))
 
 (defn on-bot-ready [^ReadyEvent ready-event]
