@@ -61,6 +61,11 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     return skip();
   }
 
+  public boolean shuffle() {
+    Collections.shuffle(queue);
+    return true;
+  }
+
   @Override
   public void onTrackEnd(final AudioPlayer player, final AudioTrack track, final AudioTrackEndReason endReason) {
     if(loop && endReason == AudioTrackEndReason.FINISHED) {
