@@ -47,7 +47,7 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     if (queue.isEmpty()) {
       return true;
     } else {
-      return play(queue.remove(0), true);
+      return play(queue.remove(0), false);
     }
   }
 

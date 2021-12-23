@@ -2,7 +2,8 @@
   (:require [clojure.string :as string]
             [clojure.tools.logging :as log]
             [cljukebox.util :as util]
-            [cljukebox.handlers :as handlers])
+            [cljukebox.handlers :as handlers]
+            [cljukebox.player :as player])
   (:import [discord4j.core DiscordClient GatewayDiscordClient]
            [discord4j.core.object.presence ClientPresence Status ClientActivity]
            [discord4j.discordjson.json ApplicationCommandOptionData ApplicationCommandRequest]
@@ -11,6 +12,7 @@
            discord4j.core.event.domain.lifecycle.ReadyEvent
            discord4j.core.event.domain.interaction.ChatInputInteractionEvent
            discord4j.core.event.domain.message.MessageCreateEvent
+           discord4j.core.event.domain.VoiceStateUpdateEvent
            discord4j.rest.RestClient
            reactor.core.publisher.Mono)
   (:gen-class))
@@ -39,6 +41,13 @@
       (.updatePresence (ClientPresence/online (ClientActivity/playing "Type '^help' for a list of commands")))
       (.block))
   (Mono/empty))
+
+(defn on-voice-state-update [^VoiceStateUpdateEvent voice-state-update-event]
+  (when (.isLeaveEvent voice-state-update-event)
+    (let [voice-state (.getCurrent voice-state-update-event)
+          guild-id (-> voice-state .getGuildId .asString)]
+      (log/info (format "Bot has been disconnected - removing audio manager & voice-connection entries for guild %s" guild-id))
+      (player/handle-guild-disconnect guild-id))))
 
 ;; Useful for cleanup
 (defn remove-all-command-definitions [^RestClient rest-client]
@@ -101,8 +110,14 @@
                        (.then))
         on-chat-input (-> client
                           (.on ChatInputInteractionEvent (util/as-function on-chat-input))
-                          (.then))]
-    (-> on-login (.and on-message) (.and on-chat-input))))
+                          (.then))
+        on-voice-state-update (-> client
+                                  (.on VoiceStateUpdateEvent (util/as-function on-voice-state-update))
+                                  (.then))]
+    (-> on-login
+        (.and on-message)
+        (.and on-chat-input)
+        (.and on-voice-state-update))))
 
 (defn start-bot! [token]
   (-> (DiscordClient/create token)
