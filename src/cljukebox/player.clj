@@ -1,5 +1,6 @@
 (ns cljukebox.player
-  (:require [cljukebox.util :as util])
+  (:require [cljukebox.util :as util]
+            [clojure.tools.logging :as log])
   (:import [cljukebox AudioTrackScheduler LavaPlayerAudioProvider]
            [com.sedmelluq.discord.lavaplayer.player AudioLoadResultHandler DefaultAudioPlayerManager]
            com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
@@ -63,6 +64,10 @@
     current-guild-audio-manager
     (mk-guild-audio-manager guild-id)))
 
+(defn handle-guild-disconnect [guild-id]
+  (swap! !guild-audio-managers dissoc guild-id)
+  (swap! !voice-connections dissoc guild-id))
+
 (defn get-current-connection [guild-id]
   (get @!voice-connections guild-id))
 
@@ -70,6 +75,7 @@
   (when-not (get @!voice-connections guild-id)
     (let [voice-connection (-> (.join voice-channel (util/as-consumer (fn [spec] (.setProvider spec provider))))
                                .block)]
+      (log/info (format "Connecting bot to voice-channel in guild %s" guild-id))
       (swap! !voice-connections assoc guild-id voice-connection))))
 
 (defrecord AudioLoadedHandler [scheduler message-channel]

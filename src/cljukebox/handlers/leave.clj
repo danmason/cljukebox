@@ -8,8 +8,7 @@
   ([{:keys [message-channel guild-id] :as data} _opts]
    (when-let [connection (player/get-current-connection guild-id)]
      (util/send-message message-channel "Leaving voice channel.")
-     (-> connection .disconnect .block)
-     (swap! player/!voice-connections dissoc guild-id))))
+     (-> connection .disconnect .block))))
 
 (def handler-data
   {:doc "Leave the currently connected voice channel"
