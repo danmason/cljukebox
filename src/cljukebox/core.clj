@@ -80,7 +80,7 @@
                                       args-as-options))]
          (-> application-service
              (.createGlobalApplicationCommand application-id command-request)
-             (.subscribe))))
+             (.subscribe))
          (log/info (format "Slash commanded added for %s" name))))
      handlers/handlers)))
 
