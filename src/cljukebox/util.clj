@@ -73,19 +73,26 @@
   (.block
    (.flatMap message-channel (as-function (fn [channel] (.createMessage channel content))))))
 
-(defn send-embed [message-channel {:keys [title description fields]}]
+(defn map->embed [embed-spec {:keys [title author color image-url thumbnail-url timestamp-instant url description fields]}]
+  (reduce
+   (fn [embed {:keys [name value inline] :as field}]
+     (.addField embed name value (some? inline)))
+   (cond-> embed-spec
+     color (.setColor color)
+     description (.setDescription description)
+     image-url (.setImage image-url)
+     thumbnail-url (.setThumbnail thumbnail-url)
+     timestamp-instant (.setTimestamp timestamp-instant)
+     title (.setTitle title)
+     url (.setUrl url))
+   fields))
+
+(defn send-embed [message-channel embed-map]
   (.block
    (.flatMap message-channel
              (as-function (fn [channel]
                             (.createEmbed channel
-                                          (as-consumer (fn [embed-spec]
-                                                         (reduce
-                                                          (fn [embed {:keys [name value inline] :as field}]
-                                                            (.addField embed name value (some? inline)))
-                                                          (-> embed-spec
-                                                              (.setTitle title)
-                                                              (.setDescription description))
-                                                          fields)))))))))
+                                          (as-consumer (fn [embed-spec] (map->embed embed-spec embed-map)))))))))
 
 (defn millis->time-str [millis]
   (let [minutes (int (/ (/ millis 1000) 60))
