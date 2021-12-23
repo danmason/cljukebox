@@ -1,5 +1,6 @@
 (ns cljukebox.core
   (:require [clojure.string :as string]
+            [clojure.tools.logging :as log]
             [cljukebox.util :as util]
             [cljukebox.handlers :as handlers])
   (:import [discord4j.core DiscordClient GatewayDiscordClient]
@@ -80,6 +81,7 @@
          (-> application-service
              (.createGlobalApplicationCommand application-id command-request)
              (.subscribe))))
+         (log/info (format "Slash commanded added for %s" name))))
      handlers/handlers)))
 
 (defn handle-client [^GatewayDiscordClient client]
