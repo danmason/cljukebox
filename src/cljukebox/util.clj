@@ -97,7 +97,7 @@
 (defn millis->time-str [millis]
   (let [minutes (int (/ (/ millis 1000) 60))
         seconds (int (mod (/ millis 1000) 60))]
-    (format "%d:%d" minutes seconds)))
+    (format "%d:%02d" minutes seconds)))
 
 (defn get-arguments [content-with-command]
   (let [args (rest (string/split content-with-command #" "))]
