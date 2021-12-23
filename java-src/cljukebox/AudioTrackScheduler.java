@@ -24,6 +24,10 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     return queue;
   }
 
+  public AudioTrack nowPlaying() {
+    return player.getPlayingTrack();
+  }
+
   public boolean play(final AudioTrack track) {
     return play(track, false);
   }

@@ -8,7 +8,8 @@
              [leave :as leave]
              [skip :as skip]
              [loop :as loop]
-             [clear :as clear]]))
+             [clear :as clear]
+             [nowplaying :as np]]))
 
 (def base-handlers
   {"prefix" prefix/handler-data
@@ -17,7 +18,8 @@
    "leave" leave/handler-data
    "skip" skip/handler-data
    "loop" loop/handler-data
-   "clear" clear/handler-data})
+   "clear" clear/handler-data
+   "nowplaying" np/handler-data})
 
 (defn help-handler
   ([{:keys [message-channel content] :as data}]
