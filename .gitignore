@@ -4,3 +4,4 @@ target/
 /logs/
 .clj-kondo/
 db.transit.json
+.calva
