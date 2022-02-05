@@ -3,12 +3,14 @@
 
 (defn set-prefix
   ([{:keys [content message-channel guild-id] :as data}]
-   (if-let [new-prefix (util/get-arguments content)]
-     (set-prefix data {:new-prefix new-prefix})
-     (util/send-message message-channel (format "Need to supply new bot prefix (currently set to `%s`)" (util/get-prefix guild-id)))))
+   (let [new-prefix (util/get-arguments content)]
+     (set-prefix data {:new-prefix new-prefix})))
   ([{:keys [message-channel guild-id] :as data} {:keys [new-prefix] :as opts}]
-   (util/merge-to-config {guild-id {:prefix new-prefix}})
-   (util/send-message message-channel (format "Command prefix set to `%s`" new-prefix))))
+   (if new-prefix
+     (do
+       (util/merge-to-config {guild-id {:prefix new-prefix}})
+       (util/send-message message-channel (format "Command prefix has been changed to `%s`" new-prefix)))
+     (util/send-message message-channel (format "Command prefix currently set to `%s`" (util/get-prefix guild-id))))))
 
 (def handler-data
   {:doc "Sets the server wide command prefix (default is `^`)"
