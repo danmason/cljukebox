@@ -103,3 +103,6 @@
   (let [args (rest (string/split content-with-command #" "))]
     (cond-> args
       (< (count args) 2) first)))
+
+(defn missing-audio-manager-message [message-channel]
+  (send-message message-channel "**Bot must be connected to voice!**"))

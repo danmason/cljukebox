@@ -10,8 +10,8 @@
   ([{:keys [voice-channel message-channel guild-id] :as data} {:keys [url] :as opts}]
    (if-not voice-channel
      (util/send-message message-channel "You're not in a voice channel - join one to queue songs on the bot.")
-     (let [{:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)]
-       (player/connect-to-voice guild-manager voice-channel)
+     (let [_ (player/connect-to-voice data)
+           {:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)]
        (.loadItemOrdered player/player-manager
                          guild-manager
                          url

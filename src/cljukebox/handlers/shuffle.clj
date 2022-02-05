@@ -2,13 +2,17 @@
   (:require [cljukebox.player :as player]
             [cljukebox.util :as util]))
 
+(defn shuffle-scheduler [{:keys [message-channel]} {:keys [scheduler]}]
+  (.shuffle scheduler)
+  (util/send-message message-channel ":twisted_rightwards_arrows: **Bot queue shuffled!**"))
+
 (defn shuffle-playlist
   ([data]
    (shuffle-playlist data nil))
   ([{:keys [message-channel guild-id] :as data} _opts]
-   (let [{:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)]
-     (.shuffle scheduler)
-     (util/send-message message-channel ":twisted_rightwards_arrows: **Bot queue shuffled!**"))))
+   (if-let [guild-manager (player/get-guild-audio-manager guild-id)]
+     (shuffle-scheduler data guild-manager)
+     (util/missing-audio-manager-message message-channel))))
 
 (def handler-data
   {:doc "Shuffles the contents of the playlist"

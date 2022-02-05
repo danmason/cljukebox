@@ -16,16 +16,20 @@
                :value identifier
                :inline true}]}))
 
-(defn audio-queue
+(defn output-now-playing [{:keys [message-channel]} {:keys [scheduler]}]
+  (if-let [current-track (.nowPlaying scheduler)]
+    (util/send-embed message-channel (mk-embed current-track))
+    (util/send-message message-channel "No song is currently playing on the bot.")))
+
+(defn now-playing
   ([data]
-   (audio-queue data nil))
+   (now-playing data nil))
   ([{:keys [message-channel guild-id] :as data} _opts]
-   (let [{:keys [scheduler] :as guild-manager} (player/get-guild-audio-manager guild-id)]
-     (if-let [current-track (.nowPlaying scheduler)]
-       (util/send-embed message-channel (mk-embed current-track))
-       (util/send-message message-channel "No song is currently playing on the bot.")))))
+   (if-let [guild-manager (player/get-guild-audio-manager guild-id)]
+     (output-now-playing data guild-manager)
+     (util/missing-audio-manager-message message-channel))))
 
 (def handler-data
   {:doc "Outputs the currently playing song in the queue"
    :usage-str "nowplaying"
-   :handler-fn audio-queue})
+   :handler-fn now-playing})

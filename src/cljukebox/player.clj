@@ -60,9 +60,7 @@
     guild-audio-manager))
 
 (defn get-guild-audio-manager [guild-id]
-  (if-let [current-guild-audio-manager (get @!guild-audio-managers guild-id)]
-    current-guild-audio-manager
-    (mk-guild-audio-manager guild-id)))
+  (get @!guild-audio-managers guild-id))
 
 (defn handle-guild-disconnect [guild-id]
   (swap! !guild-audio-managers dissoc guild-id)
@@ -71,9 +69,10 @@
 (defn get-current-connection [guild-id]
   (get @!voice-connections guild-id))
 
-(defn connect-to-voice [{:keys [guild-id provider] :as guild-manager} voice-channel]
+(defn connect-to-voice [{:keys [voice-channel guild-id]}]
   (when-not (get @!voice-connections guild-id)
-    (let [voice-connection (-> (.join voice-channel (util/as-consumer (fn [spec] (.setProvider spec provider))))
+    (let [{:keys [provider]} (mk-guild-audio-manager guild-id)
+          voice-connection (-> (.join voice-channel (util/as-consumer (fn [spec] (.setProvider spec provider))))
                                .block)]
       (log/info (format "Connecting bot to voice-channel in guild %s" guild-id))
       (swap! !voice-connections assoc guild-id voice-connection))))
