@@ -2,3 +2,5 @@ config.edn
 target/
 .nrepl-port
 /logs/
+.clj-kondo/
+db.transit.json
