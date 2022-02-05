@@ -15,5 +15,5 @@
    :usage-str "prefix <new-prefix>"
    :args [{:name "new-prefix"
            :doc "New prefix string for the bot to use for commands"
-           :required? true}]
+           :required? false}]
    :handler-fn set-prefix})
