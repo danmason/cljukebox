@@ -2,12 +2,9 @@
   (:require [cljukebox.player :as player]
             [cljukebox.util :as util]))
 
-(def !loop (atom false))
-
 (defn loop-scheduler [{:keys [message-channel]} {:keys [scheduler]}]
-  (let [should-loop (swap! !loop not)]
-    (.setLoop scheduler should-loop)
-    (if should-loop
+  (let [loop-active? (.switchLoop scheduler)]
+    (if loop-active?
       (util/send-message message-channel ":repeat: **Loop enabled!**")
       (util/send-message message-channel ":repeat: **Loop disabled!**"))))
 
