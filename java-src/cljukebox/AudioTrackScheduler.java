@@ -51,8 +51,8 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     }
   }
 
-  public boolean setLoop(boolean shouldLoop) {
-    this.loop = shouldLoop;
+  public boolean switchLoop() {
+    loop = !loop;
     return loop;
   }
 
